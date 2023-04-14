@@ -31,7 +31,7 @@ class RecommendationService():
             "Session_id": session,
             "User_id": actor.pk if actor else None,
             "Interaction": {
-                "object": object_dict, #self.get_car_attrs(object),
+                "object": object_dict,
                 "vector": object_vector,
                 "int_type": object_type,
                 "timestamp": time.time()

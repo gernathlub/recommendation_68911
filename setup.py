@@ -12,7 +12,7 @@ setuptools.setup(
     description="Package for recommendation system (68911) integration",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/gituser/example-pkg",
+    url="https://github.com/gernathlub/recommendation_68911",
     license='MIT',
     python_requires='>=3.8',
     install_requires=[
