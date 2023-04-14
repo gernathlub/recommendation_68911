@@ -71,24 +71,26 @@ python3 manage.py migrate <your_app>
 To send your actor-object interactions to the microservice, you'll need to use the create_interaction() method of the provided RecommendationService class. It's recommended to perform this task within the dispatch() method of your view.
 
 ```python
-def dispatch(self, request, *args, **kwargs):
-        super_result = super().dispatch(request, *args, **kwargs)
-        ...
-        if request.session and self.object.vector != None:
-            RecommendationService().create_interaction(
-                object_dict={...},
-                object_vector=self.object.vector,
-                object_type="YOUR_TYPE",
-                request.session.session_key if request.session else None,
-                request.user if request.user.is_authenticated else None
-            )
-        return super_result
+class YourDetailView(...):
+    ...
+    def dispatch(self, request, *args, **kwargs):
+            super_result = super().dispatch(request, *args, **kwargs)
+            ...
+            if your_session and your_object.vector != None:
+                RecommendationService().create_interaction(
+                    object_dict={...},
+                    object_vector=your_object.vector,
+                    object_type="YOUR_TYPE",
+                    your_session.session_key if your_session else None,
+                    your_actor if your_actor.is_authenticated else None
+                )
+            return super_result
 ```
 
 Your integration of the recommendation system is now finished. To apply a recommendation filter to a query set, add the order_by_recommended() method at the end of your query.
 
 ```python
-class YourView(...):
+class YourListView(...):
     ...
     def get_queryset(...):
         qs = super().get_queryset(...)
