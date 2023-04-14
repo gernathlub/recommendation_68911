@@ -19,7 +19,7 @@ class AbstractRecomObject(AbstractVectorizedModel):
         
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if self.update_vector:
+        if self.pk and self.update_vector:
             RecommendationService().update_car_vector(self.pk, self.vector, self.dict_repr)
         
 

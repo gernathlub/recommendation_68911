@@ -1,15 +1,14 @@
 # Recommendation_68911
-Django PyPi package serving as recommendation system interface, providing models, managers and migrations required by vector recommendation service. This package is ment only for Django version 3.2 and above, using PostgreSQL database. Package is ment to be used with specific recommendation engine (not published yet) and its not for general purpouse.
+Django PyPi package serving as the interface for the recommendation system, providing models, managers, and migrations required by the vector recommendation service. This package is meant only for Django version 3.2 and above using the PostgreSQL database. The package is intended to be used with a specific recommendation engine developed as part of my master's thesis project (not yet published) and is not for general purposes.
 
-## Instalation guide
+## Installation guide
 Install pip package:
 
 ```bash
 pip install recommendation-68911
 ```
 
-Add package to installed apps in settings.py file (recommended before custom apps depending on this package).
-
+Add the package to the installed apps in the settings.py file (recommended before custom apps depending on this package).
 
 ```python
 INSTALLED_APPS = [
@@ -19,19 +18,19 @@ INSTALLED_APPS = [
 ]
 ```
 
-Add RECOMMENDATION_SQS_URL variable to your setings, which will specity URL of your recommendation microservice API endpoint.
+Add the RECOMMENDATION_SQS_URL variable to your settings, which will specify the URL of your recommendation microservice API endpoint.
 
 ```python
 RECOMMENDATION_SQS_URL = 'https://your.api.endpiont/...'
 ```
 
-Run pre-created migration to install cube extension for your PostgreSQL (extension is compatible to be used also within AWS RDS).
+Run the pre-created migration to install the cube extension for your PostgreSQL (extension is compatible to be used also within AWS RDS).
 
 ```bash
 python3 manage.py migrate recommendation_68911
 ```
 
-Add RecomObjectQuerySet as parent to your recommended object class QuerySet manager. If you dont use one, you will neet to create it.
+Add RecomObjectQuerySet as a parent to your recommended object class QuerySet manager. If you don't have one, you will need to create one.
 
 ```python
 from recommendation_68911.managers import RecomObjectQuerySet
@@ -40,7 +39,7 @@ class YourObjectQuerySet(..., RecomObjectQuerySet):
     ...
 ```
 
-Specify AbstractRecomObject as parent of object class you want to recommend and AbstractRecomActor for actor class in your apps models.py. Also specify objects attrbute of YourObjectClass to use QuerySet manager created in previous step. Finally, its strongly recommended to specify cases when you dont want to perform pbjects vector update in save() method by setting self.update_vector attribute. If updating vector is wanted, its required to provide objects attributes in self.dict_repr. 
+Specify AbstractRecomObject as the parent of the object class you want to recommend and AbstractRecomActor for the actor class in your app's models.py. Also specify objects attributable to YourObjectClass to use the QuerySetManager created in the previous step. Finally, it's strongly recommended to specify cases when you don't want to perform object vector updates in the save() method by setting the self.update_vector attribute. If updating the vector is wanted, it is required to provide the object's attributes in self.dict_repr.
 
 ```python
 from recommendation_68911.models import AbstractRecomObject, AbstractRecomActor
@@ -69,10 +68,26 @@ python3 manage.py makemigrations <your_app>
 python3 manage.py migrate <your_app>
 ```
 
-Your integration of recommendation system is now finished. To apply recommendation filter on queryset, add order_by_recommended() method at the end of your query.
+To send your actor-object interactions to the microservice, you'll need to use the create_interaction() method of the provided RecommendationService class. It's recommended to perform this task within the dispatch() method of your view.
 
 ```python
+def dispatch(self, request, *args, **kwargs):
+        super_result = super().dispatch(request, *args, **kwargs)
+        ...
+        if request.session and self.object.vector != None:
+            RecommendationService().create_interaction(
+                object_dict={...},
+                object_vector=self.object.vector,
+                object_type="YOUR_TYPE",
+                request.session.session_key if request.session else None,
+                request.user if request.user.is_authenticated else None
+            )
+        return super_result
+```
 
+Your integration of the recommendation system is now finished. To apply a recommendation filter to a query set, add the order_by_recommended() method at the end of your query.
+
+```python
 class YourView(...):
     ...
     def get_queryset(...):
